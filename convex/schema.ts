@@ -12,4 +12,13 @@ export default defineSchema({
     time: v.string(),
     orderId: v.optional(v.string()),
   }),
+  assistants: defineTable({
+    id: v.number(),
+    name: v.string(),
+    title: v.string(),
+    image: v.string(),
+    instruction: v.string(),
+    userInstruction: v.string(),
+    sampleQuestions: v.any(),
+  }),
 });
