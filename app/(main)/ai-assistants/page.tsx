@@ -1,11 +1,16 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import AIAssistantList from "@/services/AIAssistantList";
 import Image from "next/image";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 import { ShineBorder } from "@/components/magicui/shine-border";
+import { useConvex, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { AuthContext } from "@/context/AuthContext";
+import { Loader2Icon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export type ASSISTANT = {
   id: number;
@@ -19,6 +24,33 @@ export type ASSISTANT = {
 
 function AIAssistants() {
   const [selectedAssistant, setSelectedAssistant] = useState<ASSISTANT[]>([]);
+  const writeAssistants = useMutation(api.assistants.addSelectedAssistants);
+  const { user } = useContext(AuthContext);
+  const [loading, setLoading] = useState(false);
+
+  // // Get user assistants
+  // const convex = useConvex();
+  // const router = useRouter();
+
+  // useEffect(() => {
+  //   const getUserAssistants = async () => {
+  //     const output = await convex.query(api.assistants.getAllUserAssistants, {
+  //       uid: user?._id,
+  //     });
+  //     console.log(output);
+
+  //     if (output.length > 0) {
+  //       // Navigate to new screen
+  //       router.replace("/workspace");
+  //       return;
+  //     }
+  //   };
+
+  //   if (user) {
+  //     getUserAssistants();
+  //   }
+  // }, [user, convex, router]);
+
   const onSelect = (assistant: ASSISTANT) => {
     const item = selectedAssistant.find(
       (item: ASSISTANT) => item.id == assistant.id
@@ -40,6 +72,16 @@ function AIAssistants() {
     return item ? true : false;
   };
 
+  const continueButtonHandler = async () => {
+    setLoading(true);
+    const output = await writeAssistants({
+      records: selectedAssistant,
+      uid: user?._id,
+    });
+    setLoading(false);
+    console.log(output);
+  };
+
   return (
     <div className="px-10 mt-20 md:px-28 lg:px-36 xl:px-48">
       <div className="flex justify-between items-center">
@@ -55,9 +97,10 @@ function AIAssistants() {
         <div>
           <Button
             className="bg-orange-300 text-black font-bold"
-            disabled={selectedAssistant.length === 0}
+            disabled={selectedAssistant?.length === 0 || loading}
+            onClick={continueButtonHandler}
           >
-            Continue
+            {loading && <Loader2Icon className="animate-spin" />} Continue
           </Button>
         </div>
       </div>

@@ -20,5 +20,6 @@ export default defineSchema({
     instruction: v.string(),
     userInstruction: v.string(),
     sampleQuestions: v.any(),
+    uid: v.id("users"),
   }),
 });
